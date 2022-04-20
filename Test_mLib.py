@@ -52,10 +52,10 @@ def ProcessGyro(pretime):
     global anglegz
     while 1:
         try:
+            pretime = timer()
             (x,y,z,t) = test_gyro85.GetGyroValue()
             if t:
                 dtime = timer() - pretime
-                pretime = timer()
                 gx_rate = (x - gyrooffsetX)
                 gy_rate = (y - gyrooffsetY)
                 gz_rate = (z - gyrooffsetZ)
