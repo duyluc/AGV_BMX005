@@ -46,7 +46,7 @@ gyrooffsetX = 0
 gyrooffsetY = 0
 gyrooffsetZ = 0
 
-def ProcessGyro():
+def ProcessGyro(pretime):
     pretime = timer()
     global anglegx
     global anglegy
@@ -121,6 +121,7 @@ def Main():
         
     for i in range(0,200):
         (x,y,z,t) = test_gyro85.GetGyroValue()
+        pretime = timer()
         if t:
             if i == 0:
                 gyrooffsetX = x
@@ -133,11 +134,10 @@ def Main():
 
     time.sleep(0.5)
 
-    t_processgyro = threading.Thread(target = ProcessGyro, args = ())
+    t_processgyro = threading.Thread(target = ProcessGyro, args = (pretime))
     t_processgyro.start()
     while True:
         try:
-            pretime = timer()
             (x,y,z) = test_gyro85.GetAcclValue()
             rawx = x - accoffsetX
             rawy = y - accoffsetY
