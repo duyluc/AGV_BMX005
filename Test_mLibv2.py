@@ -6,6 +6,9 @@ import time
 import curses
 from timeit import default_timer as timer
 import math
+import threading
+
+#backup
 
 test_gyro85 = Gy85.Gy85(1,0x53,0x68,0x1e)
 
@@ -26,6 +29,45 @@ def screen_DisplayMag(screen, col, heading, declination,x,y,z):
     screen.addstr(3,col,"%.2f  " %x)
     screen.addstr(4,col,"%.2f  " %y)
     screen.addstr(5,col,"%.2f  " %z)
+
+accoffsetX = 0
+accoffsetY = 0
+accoffsetZ = 0
+
+magoffsetX = 0
+magoffsetY = 0
+magoffsetZ = 0
+
+anglegx = 0
+anglegy = 0
+anglegz = 0
+
+gyrooffsetX = 0
+gyrooffsetY = 0
+gyrooffsetZ = 0
+
+def ProcessGyro(pretime):
+    global anglegx
+    global anglegy
+    global anglegz
+    while 1:
+        try:
+            pretime = timer()
+            (x,y,z,t) = test_gyro85.GetGyroValue()
+            if t:
+                dtime = timer() - pretime
+                gx_rate = (x - gyrooffsetX)/14.375
+                gy_rate = (y - gyrooffsetY)/14.375
+                gz_rate = (z - gyrooffsetZ)/14.375
+
+                anglegx = anglegx + (gx_rate * dtime)
+                anglegy = anglegy + (gy_rate * dtime)
+                anglegz = anglegz + (gz_rate * dtime)
+
+                #test
+            time.sleep(0.1)
+        except Exception:
+            break
 
 def Main():
     myscreen = curses.initscr() # Initialize the curses
@@ -66,21 +108,6 @@ def Main():
     myscreen.addstr(5, int(col3) + 1, "z:          ", curses.color_pair(2))
     #  Initialization
     #----------------------------------------------------------
-    accoffsetX = 0
-    accoffsetY = 0
-    accoffsetZ = 0
-
-    magoffsetX = 0
-    magoffsetY = 0
-    magoffsetZ = 0
-
-    gyrooffsetX = 0
-    gyrooffsetY = 0
-    gyrooffsetZ = 0
-
-    anglegx = 0
-    anglegy = 0
-    anglegz = 0
 
     for i in range(0,200):
         (x,y,z) = test_gyro85.GetAcclValue()
@@ -95,6 +122,7 @@ def Main():
         
     for i in range(0,200):
         (x,y,z,t) = test_gyro85.GetGyroValue()
+        pretime = timer()
         if t:
             if i == 0:
                 gyrooffsetX = x
@@ -107,59 +135,53 @@ def Main():
 
     time.sleep(0.5)
 
+    t_processgyro = threading.Thread(target = ProcessGyro, args = (pretime,))
+    t_processgyro.start()
     while True:
-        pretime = timer()
-        (x,y,z) = test_gyro85.GetAcclValue()
-        rawx = x - accoffsetX
-        rawy = y - accoffsetY
-        rawz = z - (255-accoffsetZ)
+        try:
+            (x,y,z) = test_gyro85.GetAcclValue()
+            rawx = x - accoffsetX
+            rawy = y - accoffsetY
+            rawz = z - (255-accoffsetZ)
 
-        X = rawx/256.00
-        Y = rawy/256.00
-        Z = rawz/256.00
-        
-        rollrad = math.atan(Y/math.sqrt(X*X+Z*Z))
-        pitchrad = math.atan(X/mat.sqrt(Y*Y+Z*Z))
-        rolldeg = 180*(math.atan(Y/math.sqrt(X*X+Z*Z)))/math.pi
-        pitchdeg = 180*(math.atan(X/math.sqrt(Y*Y+Z*Z)))/math.pi
+            X = rawx/256.00
+            Y = rawy/256.00
+            Z = rawz/256.00
+            rollrad = math.atan(Y/math.sqrt(X*X+Z*Z))
+            pitchrad = math.atan(X/math.sqrt(Y*Y+Z*Z))
+            rolldeg = 180*(math.atan(Y/math.sqrt(X*X+Z*Z)))/math.pi
+            pitchdeg = 180*(math.atan(X/math.sqrt(Y*Y+Z*Z)))/math.pi
 
-        screen_DisplayAccl(myscreen, int(col2) + 4, X, Y, Z)
+            screen_DisplayAccl(myscreen, int(col2) + 4, X, Y, Z)
+            screen_DisplayGyro(myscreen, 6, anglegx, anglegy, anglegz)
 
-        (x,y,z,t) = test_gyro85.GetGyroValue()
-        if t:
-            dtime = timer() - pretime
-            gx_rate = (x - gyrooffsetX)
-            gy_rate = (y - gyrooffsetY)
-            gz_rate = (z - gyrooffsetZ)
-            time.sleep(0.1)
-
-            anglegx = anglegx + (gx_rate * dtime)
-            anglegy = anglegy + (gy_rate * dtime)
-            anglegz = anglegz + (gz_rate * dtime)
-
-        screen_DisplayGyro(myscreen, 6, anglegx, anglegy, anglegz)
-        #----------------------------------------------------------
-        #GyroValue = test_gyro85.GetGyroValue()
-        #if GyroValue[3]:
-        #     (x, y, z) = (GyroValue[0],GyroValue[1],GyroValue[2]) 
-        #     initialX += x*0.1;
-        #     initialY += y*0.1;
-        #     initialZ += z*0.1;
-        #     screen_DisplayGyro(myscreen, 6, x, y, z) # Refresh the canvas 
-        ## read adxl345 data 
-        #(x, y, z) = test_gyro85.GetAcclValue()
-        #screen_DisplayAccl(myscreen, int(col2) + 4, x, y, z) # Refresh the canvas 
-        ## read hmc5883l data 
-        #(x, y, z) = test_gyro85.GetMagValue()
-        #heading = test_gyro85.hmc5883l.getHeadingString() # Get the pointing Angle 
-        #declination = test_gyro85.hmc5883l.getDeclinationString() # Obtain the compensation information of magnetic declination Angle 
-        #screen_DisplayMag(myscreen, int(col3) + 13, heading, declination, x, y, z) # Refresh the canvas 
-        #----------------------------------------------------------
-        myscreen.refresh() # Application of the canvas 
-        #time.sleep(0.1) # suspended 0.1 seconds 
+            #----------------------------------------------------------
+            #GyroValue = test_gyro85.GetGyroValue()
+            #if GyroValue[3]:
+            #     (x, y, z) = (GyroValue[0],GyroValue[1],GyroValue[2]) 
+            #     initialX += x*0.1;
+            #     initialY += y*0.1;
+            #     initialZ += z*0.1;
+            #     screen_DisplayGyro(myscreen, 6, x, y, z) # Refresh the canvas 
+            ## read adxl345 data 
+            #(x, y, z) = test_gyro85.GetAcclValue()
+            #screen_DisplayAccl(myscreen, int(col2) + 4, x, y, z) # Refresh the canvas 
+            ## read hmc5883l data 
+            #(x, y, z) = test_gyro85.GetMagValue()
+            #heading = test_gyro85.hmc5883l.getHeadingString() # Get the pointing Angle 
+            #declination = test_gyro85.hmc5883l.getDeclinationString() # Obtain the compensation information of magnetic declination Angle 
+            #screen_DisplayMag(myscreen, int(col3) + 13, heading, declination, x, y, z) # Refresh the canvas 
+            #----------------------------------------------------------
+            myscreen.refresh() # Application of the canvas 
+            #time.sleep(0.1) # suspended 0.1 seconds
+        except Exception as e:
+            print(str(e))
+            break
+    t_processgyro.join()
 
 if __name__ == "__main__":
     try:
         Main()
     except Exception as e:
         print(str(e))
+        pass
