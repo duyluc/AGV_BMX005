@@ -134,7 +134,7 @@ def Main():
 
     time.sleep(0.5)
 
-    t_processgyro = threading.Thread(target = ProcessGyro, args = (pretime))
+    t_processgyro = threading.Thread(target = ProcessGyro, args = (pretime,))
     t_processgyro.start()
     while True:
         try:
