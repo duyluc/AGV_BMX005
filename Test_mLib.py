@@ -6,7 +6,7 @@ import time
 import curses
 from timeit import default_timer as timer
 import math
-import theading
+import threading
 
 #backup
 
