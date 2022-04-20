@@ -176,8 +176,7 @@ def Main():
         except Exception as e:
             print(str(e))
             break
-        finally:
-            t_processgyro.join()
+    t_processgyro.join()
 
 if __name__ == "__main__":
     try:
