@@ -6,6 +6,7 @@ import time
 import curses
 from timeit import default_timer as timer
 import math
+import theading
 
 test_gyro85 = Gy85.Gy85(1,0x53,0x68,0x1e)
 
@@ -26,6 +27,41 @@ def screen_DisplayMag(screen, col, heading, declination,x,y,z):
     screen.addstr(3,col,"%.2f  " %x)
     screen.addstr(4,col,"%.2f  " %y)
     screen.addstr(5,col,"%.2f  " %z)
+
+accoffsetX = 0
+accoffsetY = 0
+accoffsetZ = 0
+
+magoffsetX = 0
+magoffsetY = 0
+magoffsetZ = 0
+
+anglegx = 0
+anglegy = 0
+anglegz = 0
+
+gyrooffsetX = 0
+gyrooffsetY = 0
+gyrooffsetZ = 0
+
+def ProcessGyro():
+    try:
+        pretime = timer()
+        while 1:
+            (x,y,z,t) = test_gyro85.GetGyroValue()
+            if t:
+                dtime = timer() - pretime
+                pritime = timer()
+                gx_rate = (x - gyrooffsetX)
+                gy_rate = (y - gyrooffsetY)
+                gz_rate = (z - gyrooffsetZ)
+
+                anglegx = anglegx + (gx_rate * dtime)
+                anglegy = anglegy + (gy_rate * dtime)
+                anglegz = anglegz + (gz_rate * dtime)
+            screen_DisplayGyro(myscreen, 6, anglegx, anglegy, anglegz)
+            time.sleep(0.05)
+
 
 def Main():
     myscreen = curses.initscr() # Initialize the curses
@@ -66,21 +102,6 @@ def Main():
     myscreen.addstr(5, int(col3) + 1, "z:          ", curses.color_pair(2))
     #  Initialization
     #----------------------------------------------------------
-    accoffsetX = 0
-    accoffsetY = 0
-    accoffsetZ = 0
-
-    magoffsetX = 0
-    magoffsetY = 0
-    magoffsetZ = 0
-
-    gyrooffsetX = 0
-    gyrooffsetY = 0
-    gyrooffsetZ = 0
-
-    anglegx = 0
-    anglegy = 0
-    anglegz = 0
 
     for i in range(0,200):
         (x,y,z) = test_gyro85.GetAcclValue()
@@ -107,6 +128,7 @@ def Main():
 
     time.sleep(0.5)
 
+    t_processgyro = threading.Thread(target = ProcessGyro, args = ())
     while True:
         try:
             pretime = timer()
@@ -118,7 +140,6 @@ def Main():
             X = rawx/256.00
             Y = rawy/256.00
             Z = rawz/256.00
-        
             rollrad = math.atan(Y/math.sqrt(X*X+Z*Z))
             pitchrad = math.atan(X/math.sqrt(Y*Y+Z*Z))
             rolldeg = 180*(math.atan(Y/math.sqrt(X*X+Z*Z)))/math.pi
@@ -126,19 +147,6 @@ def Main():
 
             screen_DisplayAccl(myscreen, int(col2) + 4, X, Y, Z)
 
-            (x,y,z,t) = test_gyro85.GetGyroValue()
-            if t:
-                dtime = timer() - pretime
-                gx_rate = (x - gyrooffsetX)
-                gy_rate = (y - gyrooffsetY)
-                gz_rate = (z - gyrooffsetZ)
-                time.sleep(0.1)
-
-                anglegx = anglegx + (gx_rate * dtime)
-                anglegy = anglegy + (gy_rate * dtime)
-                anglegz = anglegz + (gz_rate * dtime)
-
-            screen_DisplayGyro(myscreen, 6, anglegx, anglegy, anglegz)
             #----------------------------------------------------------
             #GyroValue = test_gyro85.GetGyroValue()
             #if GyroValue[3]:
@@ -161,9 +169,12 @@ def Main():
         except Exception as e:
             print(str(e))
             break
+        finally:
+            t_processgyro.join()
 
 if __name__ == "__main__":
     try:
         Main()
     except Exception as e:
         print(str(e))
+        pass
