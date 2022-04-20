@@ -119,7 +119,7 @@ def Main():
         Z = rawz/256.00
         
         rollrad = math.atan(Y/math.sqrt(X*X+Z*Z))
-        pitchrad = math.atan(X/mat.sqrt(Y*Y+Z*Z))
+        pitchrad = math.atan(X/math.sqrt(Y*Y+Z*Z))
         rolldeg = 180*(math.atan(Y/math.sqrt(X*X+Z*Z)))/math.pi
         pitchdeg = 180*(math.atan(X/math.sqrt(Y*Y+Z*Z)))/math.pi
 
