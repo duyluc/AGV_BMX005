@@ -56,7 +56,7 @@ def ProcessGyro(pretime):
             (x,y,z,t) = test_gyro85.GetGyroValue()
             if t:
                 dtime = timer() - pretime
-                pritime = timer()
+                pretime = timer()
                 gx_rate = (x - gyrooffsetX)
                 gy_rate = (y - gyrooffsetY)
                 gz_rate = (z - gyrooffsetZ)
@@ -66,7 +66,6 @@ def ProcessGyro(pretime):
                 anglegz = anglegz + (gz_rate * dtime)
 
                 #test 
-                anglegx = dtime
             time.sleep(0.05)
         except Exception:
             break
