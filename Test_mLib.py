@@ -46,8 +46,11 @@ gyrooffsetX = 0
 gyrooffsetY = 0
 gyrooffsetZ = 0
 
-def ProcessGyro(myscreen):
+def ProcessGyro():
     pretime = timer()
+    global anglegx
+    global anglegy
+    global anglegz
     while 1:
         try:
             (x,y,z,t) = test_gyro85.GetGyroValue()
@@ -61,7 +64,6 @@ def ProcessGyro(myscreen):
                 anglegx = anglegx + (gx_rate * dtime)
                 anglegy = anglegy + (gy_rate * dtime)
                 anglegz = anglegz + (gz_rate * dtime)
-            screen_DisplayGyro(myscreen, 6, anglegx, anglegy, anglegz)
             time.sleep(0.05)
         except Exception:
             break
@@ -150,6 +152,7 @@ def Main():
             pitchdeg = 180*(math.atan(X/math.sqrt(Y*Y+Z*Z)))/math.pi
 
             screen_DisplayAccl(myscreen, int(col2) + 4, X, Y, Z)
+            screen_DisplayGyro(myscreen, 6, anglegx, anglegy, anglegz)
 
             #----------------------------------------------------------
             #GyroValue = test_gyro85.GetGyroValue()
