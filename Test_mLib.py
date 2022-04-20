@@ -64,6 +64,9 @@ def ProcessGyro(pretime):
                 anglegx = anglegx + (gx_rate * dtime)
                 anglegy = anglegy + (gy_rate * dtime)
                 anglegz = anglegz + (gz_rate * dtime)
+
+                #test 
+                anglegx = dtime
             time.sleep(0.05)
         except Exception:
             break
