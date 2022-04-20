@@ -108,7 +108,7 @@ def Main():
     time.sleep(0.5)
 
     while True:
-        pretime = timer()
+        
         (x,y,z) = test_gyro85.GetAcclValue()
         rawx = x - accoffsetX
         rawy = y - accoffsetY
@@ -124,7 +124,7 @@ def Main():
         pitchdeg = 180*(math.atan(X/math.sqrt(Y*Y+Z*Z)))/math.pi
 
         screen_DisplayAccl(myscreen, int(col2) + 4, X, Y, Z)
-
+        pretime = timer()
         (x,y,z,t) = test_gyro85.GetGyroValue()
         if t:
             dtime = timer() - pretime
