@@ -46,7 +46,7 @@ gyrooffsetX = 0
 gyrooffsetY = 0
 gyrooffsetZ = 0
 
-def ProcessGyro():
+def ProcessGyro(myscreen):
     pretime = timer()
     while 1:
         try:
@@ -131,7 +131,7 @@ def Main():
 
     time.sleep(0.5)
 
-    t_processgyro = threading.Thread(target = ProcessGyro, args = ())
+    t_processgyro = threading.Thread(target = ProcessGyro, args = (myscreen))
     t_processgyro.start()
     while True:
         try:
