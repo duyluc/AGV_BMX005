@@ -47,7 +47,6 @@ gyrooffsetY = 0
 gyrooffsetZ = 0
 
 def ProcessGyro(pretime):
-    pretime = timer()
     global anglegx
     global anglegy
     global anglegz
@@ -66,6 +65,7 @@ def ProcessGyro(pretime):
                 anglegz = anglegz + (gz_rate * dtime)
 
                 #test 
+                anglegx = dtime
             time.sleep(0.05)
         except Exception:
             break
