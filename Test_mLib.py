@@ -8,6 +8,8 @@ from timeit import default_timer as timer
 import math
 import theading
 
+#backup
+
 test_gyro85 = Gy85.Gy85(1,0x53,0x68,0x1e)
 
 def screen_DisplayGyro(screen,col,x,y,z):
@@ -45,9 +47,9 @@ gyrooffsetY = 0
 gyrooffsetZ = 0
 
 def ProcessGyro():
-    try:
-        pretime = timer()
-        while 1:
+    pretime = timer()
+    while 1:
+        try:
             (x,y,z,t) = test_gyro85.GetGyroValue()
             if t:
                 dtime = timer() - pretime
@@ -61,7 +63,8 @@ def ProcessGyro():
                 anglegz = anglegz + (gz_rate * dtime)
             screen_DisplayGyro(myscreen, 6, anglegx, anglegy, anglegz)
             time.sleep(0.05)
-
+        except Exception:
+            break
 
 def Main():
     myscreen = curses.initscr() # Initialize the curses
