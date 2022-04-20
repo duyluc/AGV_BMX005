@@ -160,7 +160,7 @@ def Main():
             #time.sleep(0.1) # suspended 0.1 seconds
         except Exception as e:
             print(str(e))
-            pass
+            break
 
 if __name__ == "__main__":
     try:
