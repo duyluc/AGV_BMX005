@@ -56,9 +56,9 @@ def ProcessGyro(pretime):
             (x,y,z,t) = test_gyro85.GetGyroValue()
             if t:
                 dtime = timer() - pretime
-                gx_rate = (x - gyrooffsetX)
-                gy_rate = (y - gyrooffsetY)
-                gz_rate = (z - gyrooffsetZ)
+                gx_rate = (x - gyrooffsetX)/14.375
+                gy_rate = (y - gyrooffsetY)/14.375
+                gz_rate = (z - gyrooffsetZ)/14.375
 
                 anglegx = anglegx + (gx_rate * dtime)
                 anglegy = anglegy + (gy_rate * dtime)
