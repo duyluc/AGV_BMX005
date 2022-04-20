@@ -128,9 +128,13 @@ def Main():
         (x,y,z,t) = test_gyro85.GetGyroValue()
         if t:
             dtime = timer() - pretime
-            gx_rate = (x - gyrooffsetX)/14.375
-            gy_rate = (y - gyrooffsetY)/14.375
-            gz_rate = (z - gyrooffsetZ)/14.375
+            #gx_rate = (x - gyrooffsetX)/14.375
+            #gy_rate = (y - gyrooffsetY)/14.375
+            #gz_rate = (z - gyrooffsetZ)/14.375
+
+            gx_rate = (x)/14.375
+            gy_rate = (y)/14.375
+            gz_rate = (z)/14.375
             time.sleep(0.1)
 
             anglegx = anglegx + (gx_rate * dtime)
